@@ -1,0 +1,2 @@
+Message: [WinError 3] The system cannot find the path specified: '/home/seth/Pictures/penguin' 
+Message: [WinError 3] The system cannot find the path specified: 'C:\\\\Documents\\\\Newsletters\\\\Summer\\\\beach' 
