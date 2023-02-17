@@ -1,7 +1,8 @@
 const component = () => {
     return (
         <div>
-            Hello World!
-        </div>
+                    Hello World!
+                    <span> Slogan </span>
+                    </div>
     )
 }
