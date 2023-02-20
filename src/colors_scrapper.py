@@ -2,7 +2,7 @@ import re
 import shutil
 import os
 import logging
-from settings import LOGS_PATH, PROJECT_PATH, VALID_EXTENSIONS, CSS_COLOR_ATTRIBUTES, HTML_COLOR_ATTRIBUTES
+from settings import CSS_VARIABLES_FILENAME, LOGS_PATH, PROJECT_PATH, VALID_EXTENSIONS, CSS_COLOR_ATTRIBUTES, HTML_COLOR_ATTRIBUTES
 from copy_manager import CopyManager, WindowsCopyManager
 from pathlib import Path
 from abc import ABC, abstractmethod
@@ -18,9 +18,12 @@ class Scrapper:
         self.colors_groups = dict()
         self.all_files = self.get_all_files()
 
-    def create_css_variables_file(self, ):
-        #TODO
-        return None
+    def create_css_variables_file(self) -> None:
+        with open(os.path.join(self.copy_manager.destination_path, CSS_VARIABLES_FILENAME), 'w') as file:
+            file.write(":root{")
+            for key, value in self.colors_groups.items():
+                file.write('\t' + value + ': ' + key + ';\n')
+            file.write("}")
 
     def get_all_files(self) -> list:
         p = Path(self.copy_manager.destination_path).glob('**/*')
@@ -41,7 +44,7 @@ class FileScrapper(ABC):
     
     def update_colors_variables(self, color: str):
         if color not in self.colors_groups:
-            self.colors_groups[color] = f'variable_{color}'
+            self.colors_groups[color] = f'--variable_{color}'
     
     def replace_color_in_line(self, line: str, color: str) -> str:
         return line.replace(color, self.colors_groups[color])
