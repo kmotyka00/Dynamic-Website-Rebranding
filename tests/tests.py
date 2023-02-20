@@ -77,7 +77,7 @@ class TestCSSScrapper(unittest.TestCase):
         css_scrapper.scrap_file()
         print(css_scrapper.colors_groups)       
 
-        # shutil.rmtree(scrapper.copy_manager.destination_path)
+        shutil.rmtree(scrapper.copy_manager.destination_path)
 
 class TestFileScrappers(unittest.TestCase):
     pass
