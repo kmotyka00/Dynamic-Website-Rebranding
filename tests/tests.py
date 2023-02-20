@@ -72,12 +72,12 @@ class TestCSSScrapper(unittest.TestCase):
     def test_scrap_file(self,):
         path: str = r'..\\tests\\test_resources\\netflix_website'
         scrapper = Scrapper(source_path=path)
-        css_scrapper = CSSScrapper(scrapper.colors_groups, os.path.join(scrapper.copy_manager.destination_path, '   netflixstyles.css'))
+        css_scrapper = CSSScrapper(scrapper.colors_groups, os.path.join(scrapper.copy_manager.destination_path, 'netflixstyles.css'))
         scrapper.copy_manager.prettier()
         css_scrapper.scrap_file()
         print(css_scrapper.colors_groups)       
 
-        shutil.rmtree(scrapper.copy_manager.destination_path)
+        # shutil.rmtree(scrapper.copy_manager.destination_path)
 
 class TestFileScrappers(unittest.TestCase):
     pass

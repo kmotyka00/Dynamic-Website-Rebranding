@@ -4,4 +4,4 @@ from settings import LOGS_PATH, PROJECT_PATH
 
 
 scrapper = Scrapper('../test_resources/')
-copy
+

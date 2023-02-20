@@ -2,7 +2,7 @@ import re
 import shutil
 import os
 import logging
-from settings import LOGS_PATH, PROJECT_PATH, VALID_EXTENSIONS, CSS_COLOR_ATRIBUTES
+from settings import LOGS_PATH, PROJECT_PATH, VALID_EXTENSIONS, CSS_COLOR_ATTRIBUTES, HTML_COLOR_ATTRIBUTES
 from copy_manager import CopyManager, WindowsCopyManager
 from pathlib import Path
 from abc import ABC, abstractmethod
@@ -53,8 +53,8 @@ class HTMLScrapper(FileScrapper):
     def scrap_file(self):
         with open(self.path, 'r+') as f:
             style_reg = re.compile("style=")
-            color_reg = re.compile("color:")
-            end_reg = re.compile("")
+            end_reg = re.compile(r'[";]')
+            
             while True:
                 line = f.readline()
                 
@@ -64,12 +64,14 @@ class HTMLScrapper(FileScrapper):
                 style_pos = style_reg.search(line)
                 if style_pos:
                     style_pos = style_pos.span()[0]
-
-                    color_pos = color_reg.search(line[style_pos:])
-                    if color_pos:
-                        color_beg = color_pos.span()[1]
-                        print(color_pos.string[color_beg:])
-
+                    
+                    for html_attribute in HTML_COLOR_ATTRIBUTES:
+                        color_reg = re.compile(html_attribute + ":")
+                        color_pos = color_reg.search(line[style_pos:])
+                        if color_pos:
+                            color_beg = color_pos.span()[1]
+                            end_pos = color_reg.search(line[color_beg:]).span()[0]
+                            print(color_pos.string[color_beg:]) 
                 
 class CSSScrapper(FileScrapper):
     def __init__(self, colors_groups: dict, path: str) -> None:
@@ -82,18 +84,18 @@ class CSSScrapper(FileScrapper):
                 if not line:
                     break
                 words = line.split(' ')
-                # print(words)
-                for css_atribute in CSS_COLOR_ATRIBUTES:
+                for css_attribute in CSS_COLOR_ATTRIBUTES:
                     for i, word in enumerate(words):
-                        if css_atribute in word:
-                            print("IM IN")
-                            print(words)
+                        if css_attribute in word and i < len(words):
+                            line = self.find_var_return_line(words, i)
+                    
+            print(self.colors_groups)
 
-                            if self.colors_groups.get(words[i+1]):
-                                #replace with css variable
-                                words[i+1] = self.colors_groups[words[i+1]]
-                            else:
-                                #create CSS Variable
-                                # self.co
-                                self.colors_groups[words[i+1]] = f'variable_{words[i+1]}'
-        print(self.colors_groups)
+    def find_var_return_line(self, words: list, index: int):
+        current_color = words[index + 1].split(';')[0]
+        if self.colors_groups.get(current_color):
+            words[index + 1] = self.colors_groups[current_color]
+        else:                      
+            self.colors_groups[current_color] = f'variable_{current_color}'
+        words[index+1] = self.colors_groups[current_color]
+        return ' '.join(words)
