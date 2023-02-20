@@ -6,6 +6,7 @@ from settings import LOGS_PATH, PROJECT_PATH, VALID_EXTENSIONS, CSS_COLOR_ATTRIB
 from copy_manager import CopyManager, WindowsCopyManager
 from pathlib import Path
 from abc import ABC, abstractmethod
+import fileinput
 # ścieżka do folderu
 # lista atrybutów których szukamy: colors, background-color...
 # 
@@ -51,27 +52,37 @@ class HTMLScrapper(FileScrapper):
         super().__init__(colors_groups, path)
 
     def scrap_file(self):
-        with open(self.path, 'r+') as f:
-            style_reg = re.compile("style=")
-            end_reg = re.compile(r'[";]')
-            
-            while True:
-                line = f.readline()
+
+        style_reg = re.compile("style=")
+        end_reg = re.compile(r'[\";]')
+        
+        for line in fileinput.input(self.path, inplace=True):
+
+            style_match = style_reg.search(line)
+            if style_match:
+
+                for html_attribute in HTML_COLOR_ATTRIBUTES:
+                    color_reg = re.compile(html_attribute + ":")
+                    color_match = color_reg.search(line)
+                    if color_match:
+                        color_beg = color_match.span()[1] + 1
+                        end_pos = end_reg.search(line[color_beg:]).span()[1] - 1
+
+                        color = line[color_beg: color_beg + end_pos]
+
+                        self.update_colors_variables(color)
+                        line = self.replace_color_in_line(line, color)
+                        
+            print(line, end="")
                 
-                if not line:
-                    break
-                
-                style_pos = style_reg.search(line)
-                if style_pos:
-                    style_pos = style_pos.span()[0]
-                    
-                    for html_attribute in HTML_COLOR_ATTRIBUTES:
-                        color_reg = re.compile(html_attribute + ":")
-                        color_pos = color_reg.search(line[style_pos:])
-                        if color_pos:
-                            color_beg = color_pos.span()[1]
-                            end_pos = color_reg.search(line[color_beg:]).span()[0]
-                            print(color_pos.string[color_beg:]) 
+    def update_colors_variables(self, color: str):
+        if color not in self.colors_groups:
+            self.colors_groups[color] = f'variable_{color}'
+    
+    def replace_color_in_line(self, line: str, color: str) -> str:
+
+        return line.replace(color, self.colors_groups[color])
+
                 
 class CSSScrapper(FileScrapper):
     def __init__(self, colors_groups: dict, path: str) -> None:
