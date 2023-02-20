@@ -78,24 +78,28 @@ class CSSScrapper(FileScrapper):
         super().__init__(colors_groups, path)
 
     def scrap_file(self,) -> None:
-        with open(self.path, 'r+') as file:
-            while True:
-                line = file.readline()
-                if not line:
-                    break
-                words = line.split(' ')
+        with open(self.path, 'r') as file:
+            lines = file.readlines()
+            line_number = 0
+            while line_number < len(lines):
+                words = lines[line_number].split(' ')
                 for css_attribute in CSS_COLOR_ATTRIBUTES:
                     for i, word in enumerate(words):
                         if css_attribute in word and i < len(words):
-                            line = self.find_var_return_line(words, i)
-                    
-            print(self.colors_groups)
+                            lines[line_number] = self.find_var_return_line(words, i)           
+                            print(lines[line_number])
+                line_number +=1
+        os.remove(self.path)
+        with open(self.path, 'w') as file:
+            file.writelines(lines)
+
+        print(self.colors_groups)
 
     def find_var_return_line(self, words: list, index: int):
+        #TODO convert to abstract method format 
         current_color = words[index + 1].split(';')[0]
-        if self.colors_groups.get(current_color):
-            words[index + 1] = self.colors_groups[current_color]
-        else:                      
+        if not self.colors_groups.get(current_color):
             self.colors_groups[current_color] = f'variable_{current_color}'
+
         words[index+1] = self.colors_groups[current_color]
-        return ' '.join(words)
+        return ' '.join(words) + ';\n'
