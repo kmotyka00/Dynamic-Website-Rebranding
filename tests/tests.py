@@ -67,7 +67,7 @@ class TestHTMLScrapper(unittest.TestCase):
         html_scrapper.scrap_file()
 
         shutil.rmtree(scrapper.copy_manager.destination_path)
-
+    
 class TestCSSScrapper(unittest.TestCase):
     def test_scrap_file(self,):
         path: str = r'..\\tests\\test_resources\\netflix_website'
@@ -79,8 +79,21 @@ class TestCSSScrapper(unittest.TestCase):
 
         shutil.rmtree(scrapper.copy_manager.destination_path)
 
-class TestFileScrappers(unittest.TestCase):
-    def test_create_css_file(self):
+# class TestFileScrappers(unittest.TestCase):
+#     def test_create_css_file(self):
+#         path: str = r'..\\tests\\test_resources\\netflix_website'
+#         scrapper = Scrapper(source_path=path)
+#         css_scrapper = CSSScrapper(scrapper.colors_groups, os.path.join(scrapper.copy_manager.destination_path, 'netflixstyles.css'))
+#         scrapper.copy_manager.prettier()
+#         css_scrapper.scrap_file()
+#         html_scrapper = HTMLScrapper(scrapper.colors_groups, os.path.join(scrapper.copy_manager.destination_path, "index.html"))
+#         html_scrapper.scrap_file()
+
+#         scrapper.create_css_variables_file()
+#         shutil.rmtree(scrapper.copy_manager.destination_path)
+
+class TestCSSVariablesUpdate(unittest.TestCase):
+    def test_html_update(self):
         path: str = r'..\\tests\\test_resources\\netflix_website'
         scrapper = Scrapper(source_path=path)
         css_scrapper = CSSScrapper(scrapper.colors_groups, os.path.join(scrapper.copy_manager.destination_path, 'netflixstyles.css'))
@@ -88,11 +101,10 @@ class TestFileScrappers(unittest.TestCase):
         css_scrapper.scrap_file()
         html_scrapper = HTMLScrapper(scrapper.colors_groups, os.path.join(scrapper.copy_manager.destination_path, "index.html"))
         html_scrapper.scrap_file()
-
         scrapper.create_css_variables_file()
+        scrapper.add_css_variables_to_html()
+
         shutil.rmtree(scrapper.copy_manager.destination_path)
-
-
 
 
 if __name__ == "__main__":

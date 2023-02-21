@@ -30,9 +30,51 @@ class Scrapper:
         all_files = [str(x) for x in p if x.is_file()]
         return filter(self.valid_files, all_files)
 
+    def change_color(self, color_key: str, color_new_value: str) -> None:
+        self.colors_groups[color_key] = color_new_value
+        self.update_css_variable()
+        raise(NotImplementedError())
+        # Here we need to reload page
+
+    def update_css_variable(self, color_key: str, color_new_value: str) -> None:
+        search_value: str = color_key + ":"
+        for line in fileinput.input(os.path.join(self.copy_manager.destination_path, CSS_VARIABLES_FILENAME), inplace=True):
+            words = line.split(' ')
+            for i, word in enumerate(words):
+                if search_value == word and i < len(words):
+                    words[i+1] = color_new_value + ";\n"
+                    line = " ".join(words)
+            print(line, end="")
+
+    def add_css_variables_to_html(self) -> None:
+        p = Path(self.copy_manager.destination_path).glob('**/*')
+        all_files = [str(x) for x in p if x.is_file()]
+        html_files = list(filter(self.valid_html_files, all_files))
+        print(html_files)
+        if len(html_files) > 1:
+            raise (NotImplementedError())
+        else:
+            head_flag = False
+            for line in fileinput.input(os.path.normpath(html_files[0]), inplace=True):
+                words = line.split(' ')
+                for word in words:
+                    if word == '<head>' or word == '<head>\n':
+                        head_flag = True
+                print(line, end="")
+                if head_flag:
+                    print(f'<link rel="stylesheet" type="text/css" href={CSS_VARIABLES_FILENAME}/>\n')
+                    head_flag = False
+
     @staticmethod
     def valid_files(path):
         if path.split('.')[-1] in VALID_EXTENSIONS:
+            return True
+        else:
+            return False
+        
+    @staticmethod
+    def valid_html_files(path):
+        if path.split('.')[-1] == 'html':
             return True
         else:
             return False
@@ -83,7 +125,6 @@ class HTMLScrapper(FileScrapper):
 
                         self.update_colors_variables(color)
                         line = self.replace_color_in_line(line, color)
-                        print(line)
                         
             print(line, end="")
                 
