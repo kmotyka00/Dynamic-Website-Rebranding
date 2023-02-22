@@ -1,6 +1,8 @@
 import sys
+
 sys.path.append('../src')
 import unittest
+from color_names_creator import ColorNamesCreator
 from colors_scrapper import Scrapper, FileScrapper, HTMLScrapper, CSSScrapper
 from copy_manager import CopyManager, WindowsCopyManager
 import os 
@@ -105,8 +107,7 @@ class TestCSSVariablesUpdate(unittest.TestCase):
 
         scrapper.change_color('--variable_1', '#123')
         scrapper.change_color('--variable_2', '#321')
-        scrapper.change_color('--variable_3', '#ABC')
-        
+        scrapper.change_color('--variable_3', '#ABC')    
 
         text_val_var_1, text_val_var_2, text_val_var_3 = None, None, None
 
@@ -130,6 +131,54 @@ class TestCSSVariablesUpdate(unittest.TestCase):
         self.assertEqual(scrapper.colors_groups['--variable_3'], '#ABC')
         self.assertEqual(text_val_var_3, '#ABC')
 
+class TestColorNamesCreator(unittest.TestCase):
+    def test_hex_validation_is_hex(self):
+        color = '0x23E5A1'
+
+        color_names_creator = ColorNamesCreator()
+
+        result = color_names_creator.validate_hex_color(color)
+        self.assertTrue(result)
+    
+    def test_hex_validation_is_not_hex(self):
+        color = 'blue'
+
+        color_names_creator = ColorNamesCreator()
+
+        result = color_names_creator.validate_hex_color(color)
+        self.assertFalse(result)
+    
+    def test_hex_validation_is_almost_hex(self):
+        color = '0x12345G'
+
+        color_names_creator = ColorNamesCreator()
+
+        result = color_names_creator.validate_hex_color(color)
+        self.assertFalse(result)
+
+    def test_truncate_color_name(self):
+        color = '0x23E5A1'
+
+        color_names_creator = ColorNamesCreator()
+        result = color_names_creator.truncate_hex_name(color)
+        self.assertEqual(result, "23E5A1")
+
+    # def test_request_wrong_url(self):
+    #     color = ''
+
+    #     color_names_creator = ColorNamesCreator()
+
+    #     with self.assertRaises(ValueError) as cm:
+    #         result = color_names_creator.request_color_name(color)
+
+    #     self.assertEqual(str(cm.exception), "Wrong response, status code: 400.")
+
+    def test_request_color_name(self):
+        color = '0xABCABC'
+
+        color_names_creator = ColorNamesCreator()
+        result = color_names_creator.request_color_name(color)
+        self.assertEqual(result, "Opal")
 
 if __name__ == "__main__":
     unittest.main()
