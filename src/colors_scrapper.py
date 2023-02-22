@@ -30,7 +30,7 @@ class Scrapper:
         self.colors_groups[color_key] = color_new_value
         self.update_css_variable(color_key, color_new_value)
 
-        # Here we need to reload page
+        # Here we need to reload page!
 
     def update_css_variable(self, color_key: str, color_new_value: str) -> None:
         search_value: str = color_key + ":"
