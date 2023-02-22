@@ -5,6 +5,7 @@ from colors_scrapper import Scrapper, FileScrapper, HTMLScrapper, CSSScrapper
 from copy_manager import CopyManager, WindowsCopyManager
 import os 
 import shutil
+from settings import CSS_VARIABLES_FILENAME
 
 class TestDirectoryCopy(unittest.TestCase):    
     # def test_linux_path(self):
@@ -93,7 +94,7 @@ class TestCSSScrapper(unittest.TestCase):
 #         shutil.rmtree(scrapper.copy_manager.destination_path)
 
 class TestCSSVariablesUpdate(unittest.TestCase):
-    def test_html_update(self):
+    def test_html_link(self):
         path: str = r'..\\tests\\test_resources\\netflix_website'
         scrapper = Scrapper(source_path=path)
         css_scrapper = CSSScrapper(scrapper.colors_groups, os.path.join(scrapper.copy_manager.destination_path, 'netflixstyles.css'))
@@ -102,9 +103,45 @@ class TestCSSVariablesUpdate(unittest.TestCase):
         html_scrapper = HTMLScrapper(scrapper.colors_groups, os.path.join(scrapper.copy_manager.destination_path, "index.html"))
         html_scrapper.scrap_file()
         scrapper.create_css_variables_file()
-        scrapper.add_css_variables_to_html()
+        html_scrapper.link_css_variables()
+    
+    def test_cssVariables_change_color(self):  
+        path: str = r'..\\tests\\test_resources\\netflix_website'
+        scrapper = Scrapper(source_path=path)
+        css_scrapper = CSSScrapper(scrapper.colors_groups, os.path.join(scrapper.copy_manager.destination_path, 'netflixstyles.css'))
+        scrapper.copy_manager.prettier()
+        css_scrapper.scrap_file()
+        html_scrapper = HTMLScrapper(scrapper.colors_groups, os.path.join(scrapper.copy_manager.destination_path, "index.html"))
+        html_scrapper.scrap_file()
+        scrapper.create_css_variables_file()
+        html_scrapper.link_css_variables()
 
-        shutil.rmtree(scrapper.copy_manager.destination_path)
+        scrapper.change_color('--variable_1', '#123')
+        scrapper.change_color('--variable_2', '#321')
+        scrapper.change_color('--variable_3', '#ABC')
+        
+
+        text_val_var_1, text_val_var_2, text_val_var_3 = None, None, None
+
+        with open(os.path.join(scrapper.copy_manager.destination_path, CSS_VARIABLES_FILENAME), 'r') as file:
+            for line in file.readlines():
+                words = line.split(' ')
+                for i, word in enumerate(words):
+                    if word == '\t--variable_1:':
+                        text_val_var_1 = words[i + 1].split(';')[0]
+                    elif word == '\t--variable_2:':
+                        text_val_var_2 = words[i + 1].split(';')[0]
+                    elif word == '\t--variable_3:':
+                        text_val_var_3 = words[i + 1].split(';')[0]
+
+        self.assertEqual(scrapper.colors_groups['--variable_1'], '#123')
+        self.assertEqual(text_val_var_1, '#123')
+
+        self.assertEqual(scrapper.colors_groups['--variable_2'], '#321')
+        self.assertEqual(text_val_var_2, '#321')
+
+        self.assertEqual(scrapper.colors_groups['--variable_3'], '#ABC')
+        self.assertEqual(text_val_var_3, '#ABC')
 
 
 if __name__ == "__main__":

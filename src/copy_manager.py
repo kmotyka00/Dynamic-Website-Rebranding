@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import shutil
 import logging
 import os
-from settings import LOGS_PATH, PROJECT_PATH
+from settings import LOGS_PATH, PROJECT_PATH, CSS_VARIABLES_FILENAME
 
 
 class CopyManager(ABC):
@@ -26,6 +26,7 @@ class CopyManager(ABC):
         finally:
             os.chdir(init_cwd)
 
+
     @abstractmethod
     def copy_source_code(self, source_path: str) -> None:
         pass
@@ -42,19 +43,21 @@ class WindowsCopyManager(CopyManager):
         # TODO: implement linux version
         try:
             shutil.copytree(source_path, self.destination_path)
+            self.create_css_file()
 
         except FileNotFoundError as e:
             logging.warning("Wrong Path, copy operation failed")
             with open(LOGS_PATH, 'a') as file:
-                #TODO add time, issue etc. 
+                #TODO: add time, issue etc. 
                 file.write(f"Message: {str(e)} \n")
     
+    def create_css_file(self):
+        with open(os.path.join(self.destination_path, CSS_VARIABLES_FILENAME), 'w') as file:
+            pass
+        
     def create_project_name(self, source_path: str):
 
-        #TODO make it prettier
-
         if len(source_path.split(r"\\")) > 1:
-
             project_name = source_path.split(r"\\")[-1]
         else:
             raise ValueError("Wrong source path.")
