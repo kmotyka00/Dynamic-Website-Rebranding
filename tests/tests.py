@@ -3,8 +3,9 @@ import sys
 sys.path.append('../src')
 import unittest
 from color_names_creator import ColorNamesCreator
-from colors_scrapper import Scrapper, FileScrapper, HTMLScrapper, CSSScrapper
-from copy_manager import CopyManager, WindowsCopyManager
+from colors_scrapper import Scrapper, HTMLScrapper, CSSScrapper
+from copy_manager import WindowsCopyManager
+from folder_manager import ReactFolderManager, HTMLProjectManager
 import os 
 import shutil
 from settings import CSS_VARIABLES_FILENAME
@@ -179,6 +180,20 @@ class TestColorNamesCreator(unittest.TestCase):
         color_names_creator = ColorNamesCreator()
         result = color_names_creator.request_color_name(color)
         self.assertEqual(result, "Opal")
+
+class TestProjectInit(unittest.TestCase):
+    def test_init_react(self):
+        path: str = r'..\\tests\\test_resources\\test_react_project'
+        scrapper = Scrapper(source_path=path)
+        react_manager = ReactFolderManager(scrapper.copy_manager.destination_path)
+        react_manager.init_project()
+    
+    def test_init_html(self):
+        path: str = r'..\\tests\\test_resources\\netflix_website'
+        scrapper = Scrapper(source_path=path)
+        react_manager = HTMLProjectManager(scrapper.copy_manager.destination_path)
+        react_manager.init_project()
+
 
 if __name__ == "__main__":
     unittest.main()

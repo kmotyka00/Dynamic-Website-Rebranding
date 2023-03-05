@@ -65,7 +65,7 @@ class FileScrapper(ABC):
                 return line.replace(color, f"var({key})")
 
     @abstractmethod
-    def scrap_file() -> None:
+    def scrap_file() -> dict:
         pass
     
     @staticmethod
@@ -107,6 +107,8 @@ class HTMLScrapper(FileScrapper):
                         
             print(line, end="")
     
+        return self.colors_groups
+    
     def link_css_variables(self) -> None:
 
         head_flag = False
@@ -139,3 +141,4 @@ class CSSScrapper(FileScrapper):
                         line = self.replace_color_in_line(line, color) 
             print(line, end="")
 
+        return self.colors_groups
